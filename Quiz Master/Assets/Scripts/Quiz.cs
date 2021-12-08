@@ -6,17 +6,41 @@ using UnityEngine.UI;
 
 public class Quiz : MonoBehaviour
 {
+    [Header("Questions")]
     [SerializeField] TextMeshProUGUI questionText;
     [SerializeField] QuestionSO question;
+
+    [Header("Answers")]
     [SerializeField] GameObject[] answerButtons;
+    int correctAnswerIndex;
+    bool hasAnsweredEarly;
+
+    [Header("Button Colors")]
     [SerializeField] Sprite defaultAnswerSprite;
     [SerializeField] Sprite correctAnswerSprite;
-    int correctAnswerIndex;
 
-    void Start()
+    [Header("Timer")]
+    [SerializeField] Image timerImage;
+    Timer timer;
+
+    private void Start()
     {
+        timer = FindObjectOfType<Timer>();
         DisplayQuestion();
         GetNextQuestion();
+    }
+
+    private void Update() {
+        timerImage.fillAmount = timer.fillFraction;
+
+        if (timer.loadNextQuestion) {
+            hasAnsweredEarly = false;
+            GetNextQuestion();
+            timer.loadNextQuestion = false;
+        } else if (!hasAnsweredEarly && !timer.isAnsweringQuestion) {
+            DisplayAnswer(-1);
+            SetButtonState(false);
+        }
     }
 
     private void GetNextQuestion() {
@@ -34,20 +58,30 @@ public class Quiz : MonoBehaviour
         }
     }
 
-    public void OnAnswerSelected(int index) {
+    public void OnAnswerSelected(int index)
+    {
+        hasAnsweredEarly = true;
+        DisplayAnswer(index);
+        SetButtonState(false);
+        timer.CancelTimer();
+    }
+
+    private void DisplayAnswer(int index)
+    {
         correctAnswerIndex = question.GetCorrectAnswerIndex();
         Image buttonImage = answerButtons[correctAnswerIndex].GetComponent<Image>();
         string correctAnswer = question.GetAnswer(correctAnswerIndex);
         buttonImage.sprite = correctAnswerSprite;
 
-        if (index == correctAnswerIndex) {
+        if (index == correctAnswerIndex)
+        {
             questionText.text = "Correct!";
-            
-        } else {
+
+        }
+        else
+        {
             questionText.text = "Sinto muito, mas a resposta correta era: \n" + correctAnswer;
         }
-
-        SetButtonState(false);
     }
 
     private void SetButtonState(bool state) {
