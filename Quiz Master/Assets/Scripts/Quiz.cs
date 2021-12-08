@@ -14,7 +14,7 @@ public class Quiz : MonoBehaviour
     [Header("Answers")]
     [SerializeField] GameObject[] answerButtons;
     int correctAnswerIndex;
-    bool hasAnsweredEarly;
+    bool hasAnsweredEarly = true;
 
     [Header("Button Colors")]
     [SerializeField] Sprite defaultAnswerSprite;
@@ -30,9 +30,10 @@ public class Quiz : MonoBehaviour
 
     [Header("ProgressBar")]
     [SerializeField] Slider progressBar;
+
     public bool isComplete;
 
-    private void Start()
+    private void Awake()
     {
         timer = FindObjectOfType<Timer>();
         scoreKeeper = FindObjectOfType<ScoreKeeper>();
@@ -44,6 +45,11 @@ public class Quiz : MonoBehaviour
         timerImage.fillAmount = timer.fillFraction;
 
         if (timer.loadNextQuestion) {
+            if (progressBar.value == progressBar.maxValue) {
+                isComplete = true;
+                return;
+            }
+
             hasAnsweredEarly = false;
             GetNextQuestion();
             timer.loadNextQuestion = false;
@@ -53,11 +59,40 @@ public class Quiz : MonoBehaviour
         }
     }
 
+    public void OnAnswerSelected(int index) {
+        hasAnsweredEarly = true;
+        DisplayAnswer(index);
+        SetButtonState(false);
+        timer.CancelTimer();
+        scoreText.text = "Score: " + scoreKeeper.CalculateScore() + "%";
+    }
+
+    private void DisplayAnswer(int index) {
+        Image buttonImage;
+        correctAnswerIndex = currentQuestion.GetCorrectAnswerIndex();
+
+        if (index == correctAnswerIndex)
+        {
+            questionText.text = "Acertou!";
+            buttonImage = answerButtons[index].GetComponent<Image>();
+            buttonImage.sprite = correctAnswerSprite;
+            scoreKeeper.IncrementCorrectAnswers();
+        }
+        else
+        {
+            correctAnswerIndex = currentQuestion.GetCorrectAnswerIndex();
+            string correctAnswer = currentQuestion.GetAnswer(correctAnswerIndex);
+            questionText.text = "Sinto muito, mas a resposta correta era: \n" + correctAnswer;
+            buttonImage = answerButtons[index].GetComponent<Image>();
+            buttonImage.sprite = correctAnswerSprite;
+        }
+    }
+
     private void GetNextQuestion() {
         if (questions.Count > 0) {
-            GetRandomQuestion();
             SetButtonState(true);
             SetDefaultButtonSprites();
+            GetRandomQuestion();            
             DisplayQuestion();
             progressBar.value++;
             scoreKeeper.IncrementQuestionsSeen();
@@ -81,35 +116,6 @@ public class Quiz : MonoBehaviour
         {
             TextMeshProUGUI buttonText = answerButtons[i].GetComponentInChildren<TextMeshProUGUI>();
             buttonText.text = currentQuestion.GetAnswer(i);
-        }
-    }
-
-    public void OnAnswerSelected(int index) {
-        hasAnsweredEarly = true;
-        DisplayAnswer(index);
-        SetButtonState(false);
-        timer.CancelTimer();
-        scoreText.text = "Score: " + scoreKeeper.CalculateScore() + "%";
-
-        if (progressBar.value == progressBar.maxValue) {
-            isComplete = true;
-        }
-    }
-
-    private void DisplayAnswer(int index) {
-        correctAnswerIndex = currentQuestion.GetCorrectAnswerIndex();
-        Image buttonImage = answerButtons[correctAnswerIndex].GetComponent<Image>();
-        string correctAnswer = currentQuestion.GetAnswer(correctAnswerIndex);
-        buttonImage.sprite = correctAnswerSprite;
-
-        if (index == correctAnswerIndex)
-        {
-            questionText.text = "Acertou!";
-            scoreKeeper.IncrementCorrectAnswers();
-        }
-        else
-        {
-            questionText.text = "Sinto muito, mas a resposta correta era: \n" + correctAnswer;
         }
     }
 
