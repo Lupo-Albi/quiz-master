@@ -13,3 +13,9 @@ MonoBehaviour:
   m_Name: Question 4
   m_EditorClassIdentifier: 
   question: Quem traiu a Sivir?
+  answers:
+  - Cassiopeia
+  - Swain
+  - LeBlanc
+  - Katarina
+  correctAnswerIndex: 0

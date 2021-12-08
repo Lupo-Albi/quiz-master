@@ -13,3 +13,9 @@ MonoBehaviour:
   m_Name: Question 1
   m_EditorClassIdentifier: 
   question: Qual o sobrenome da Lux?
+  answers:
+  - Laurent
+  - Justice
+  - Lightshield
+  - Crownguard
+  correctAnswerIndex: 3

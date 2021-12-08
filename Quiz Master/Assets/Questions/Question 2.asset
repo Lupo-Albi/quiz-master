@@ -13,3 +13,9 @@ MonoBehaviour:
   m_Name: Question 2
   m_EditorClassIdentifier: 
   question: Quem criou o Blitzcrank?
+  answers:
+  - Heimerdinger
+  - Viktor
+  - Jayce
+  - Ekko
+  correctAnswerIndex: 1
